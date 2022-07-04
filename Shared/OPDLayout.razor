@@ -1,0 +1,151 @@
+﻿@inherits LayoutComponentBase
+@inject IAuthenticationService  AuthenticationService
+@inject NavigationManager UriHelper
+@*@using Radzen.Blazor*@
+
+
+@if (AuthenticationService.User.jwtBearer != null && AuthenticationService.User.jwtBearer != " ")
+{
+
+
+  
+<div class="OPDLayout">
+
+    <div class="OPDLeft">
+        <div class="opdtoprow">
+            <span class="brand">Patient Medical Record System</span>
+            <ul class="nav flex-row" style="padding-right:100px">
+                @if (AuthenticationService.User.role != null)
+                {
+                    @if (AuthenticationService.User.role == StaffRoleEnum.Admin)
+                    {
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="opddashboard" Match="NavLinkMatch.All">
+                                Dashboard
+                            </NavLink>
+                        </li>
+
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="userlist">
+                                User
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="department">
+                                Department
+                            </NavLink>
+                        </li>
+                    }
+                }
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="opdpage">
+                        Patient List
+                    </NavLink>
+                </li>
+
+                <li class="nav-item px-3">
+
+                    <NavLink class="nav-link" href="logout">
+
+                        Logout
+
+                    </NavLink>
+                </li>
+            </ul>
+        </div>
+        <div>
+            @Body
+        </div>
+    </div>
+    <div class="OPDright">
+
+
+        <div class="d-flex flex-column align-items-center text-center p-3">
+            <img src="https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg">
+
+
+            <span class="font-weight-bold">@AuthenticationService.User.fullName</span>
+            <span class="text-black-50">@AuthenticationService.User.email</span>
+            <div class="row mt-3">
+                <button class="btn btn-info profile-button">ViewProfile</button>
+            </div>
+            <div class="row mt-2">
+                <button class="btn btn-info profile-button">PasswordChange</button>
+            </div>
+            <div class="row mt-4">
+                <div class="grid text-center my-4">
+                    @*<div>
+                            <h3>405</h3>
+                            <p>Total Patient</p>
+                        </div>
+                        <div>
+
+                            <h3>987</h3>
+                            <p>Total Male </p>
+                        </div>
+                        <div>
+
+                            <h3>3,265</h3>
+                            <p>Total Female</p>
+                        </div>
+
+                        <div>
+                            <h3>3,265</h3>
+                            <p>Total Service </p>
+                        </div>*@
+                    <div class="card" style="font-size:15px;padding:10px;font-weight:800">
+
+                        <p> @(DateTime.Now.ToLongDateString())</p>
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="row mt-4" style="height:15px;">
+
+            </div>
+
+        </div>
+
+
+
+
+
+    </div>
+
+
+
+
+</div>
+}
+else
+{
+    UriHelper.NavigateTo("login");
+}
+
+@code{
+    DateTime? value = DateTime.Now;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        base.OnInitialized();
+
+        if (AuthenticationService.User.jwtBearer == "")
+        {
+            await Task.Run(() => { UriHelper.NavigateTo("login"); });
+        }
+
+
+
+    }
+
+    void OnChange(DateTime? value, string name, string format)
+    {
+        //console.Log($"{name} value changed to {value?.ToString(format)}");
+    }
+
+
+}

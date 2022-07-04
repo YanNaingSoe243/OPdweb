@@ -1,0 +1,209 @@
+﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+
+
+*::-webkit-scrollbar {
+    width: 5px;
+}
+
+*::-webkit-scrollbar-track {
+    background: linear-gradient( to right bottom, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3) );
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #3f8ef9;
+
+    /*linear-gradient( to right bottom, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3) );*/
+    border-radius: 10px;
+    border: 2px solid #3f8ef9;
+}
+.spinner {
+    border: 20px solid rgba(255, 255, 235, 0.5);
+    /*  border: 16px solid #f3f3f3;*/
+    border-radius: 50%;
+    border-top: 16px solid #ebec0c;
+    border-right: 16px solid #26b050;
+    border-bottom: 16px solid red;
+    border-left: 16px solid #007B6F;
+    width: 150px;
+    height: 150px;
+    animation: spin 1s linear infinite;
+    top: 70px;
+    left: 50%;
+    position: absolute;
+}
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+
+:root {
+    /*--main-bg-color:rgba(255, 255, 255, 0.3);*/
+    --main-bg-color: #F6F7FB;
+    --bar-color: #1b6ec2;
+    --second-bg-color: #007B6F;
+    --font-color: #221982;
+    --Logo-Color: #0b0b0b;
+    --opdcolor: #3f8ef9;
+}
+
+html, body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: var(--main-bg-color);
+}
+
+a, .btn-link {
+    color: #0366d6;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
+}
+
+.nav-item {
+    font-size: 0.9rem;
+    /*padding-bottom: 0.5rem;
+    padding-top: 0.5rem;*/
+   
+}
+
+
+
+
+.nav-item  a {
+    color: rgba(255, 255, 255, 1);
+    border-radius: 4px;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    line-height: 3rem;
+}
+
+    .nav-item a.active {
+        /*   background-color: #33dce3;*/
+        background-color: rgba(255,255,255,0.70);
+        color: white;
+        font-weight: 700;
+    }
+
+    .nav-item a:hover {
+        /*background-color: #33dce3;*/
+        background-color: rgba(255,255,255,0.2);
+        color: white;
+        font-weight:700;
+    }
+
+.valid.modified:not([type=checkbox]) {
+    outline: 1px solid #26b050;
+}
+
+.invalid {
+    outline: 1px solid red;
+}
+
+.validation-message {
+    color: red;
+}
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+    #blazor-error-ui .dismiss {
+        cursor: pointer;
+        position: absolute;
+        right: 0.75rem;
+        top: 0.5rem;
+    }
+@media (max-width: 767.98px)  {   
+
+    .content {
+        height: 100%;
+        /*padding:10px;*/
+    }
+    .logintop-row{
+        margin-bottom:30px;
+    }
+   /* .leftlogintiop-row {
+        font-size:14px;
+        margin-left: 1px;
+    }*/
+    .rightlogintiop-row{
+        margin-right:1px;
+    }
+
+    
+}
+
+.content {
+   /* margin: 10px;*/
+    /* border-radius: 10px;*/
+    
+    /* border: 1px solid #fff;*/
+    background-color: var(--main-bg-color);
+    /* box-shadow: 3px 3px 3px #aaaaaa;*/
+    /* height: 738px;*/
+}
+.logintop-row {
+    height: 3rem;
+    display: flex;
+    width: 100%;
+    background-color: var(--bar-color);
+    align-items: center;
+    justify-content: center;
+    border-bottom:1px solid rgba(255, 255, 255, 0.7)
+   /* box-shadow: 1px 1px 1px #aaaaaa;*/
+   
+  
+}
+
+
+/*.leftlogintiop-row {
+    flex: 1;*/
+  /*  justify-content: flex-start;
+   */
+/*}*/
+/**/
+    /*.leftlogintiop-row h3 {
+        color: var(--Logo-Color);
+        font-weight: 700;
+        font-size: 18px;
+        padding-top: 15px;
+        align-items: center;
+    }*/
+
+/*.rightlogintiop-row {
+    justify-content: flex-end;*/
+   /* margin-right: 50px;*/
+/*}*/
+
+
+.login {
+    display: flex;
+    border-radius: 10px;
+    /*background-color: var(--second-bg-color);*/
+}
+
+.logindispy {
+    padding: 10px;
+}
+
+.border-md {
+    border-width: 2px;
+}

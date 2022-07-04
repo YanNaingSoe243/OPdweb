@@ -1,0 +1,155 @@
+
+.OPDLayout[b-jnknx40e6k] {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    /*background-color: #F6F7FB;*/
+    background: #660080;
+    /*background-color: #007B6F;*/
+    flex-direction: row;
+}
+
+.OPDLeft[b-jnknx40e6k] {
+    width: 85%;
+ 
+}
+.OPDright[b-jnknx40e6k] {
+    width: 15%;
+    display:flex;
+    flex-direction:row;
+    text-align:center;
+    justify-content:center;
+ 
+    /*background-color: white;*/
+    /* border-top-right-radius: 15px 15px;
+    border-bottom-right-radius:15px 15px;*/
+    margin-left: 5px;
+    box-shadow: 3px 0 3px 3px rgba(0, 0, 0, 0.3);
+    background: linear-gradient( to right bottom, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3) );   
+    padding:2px;
+}
+    .OPDright img[b-jnknx40e6k]{
+        width:120px;
+        height:130px;
+        border-radius:50%;
+
+
+    }
+    
+    .OPDright .grid h3[b-jnknx40e6k] {
+        color: #3f8ef9;
+    }
+.profile-button[b-jnknx40e6k] {
+    background: rgb(99, 39, 120);
+    box-shadow: none;
+    border: none
+}
+
+    .profile-button:hover[b-jnknx40e6k] {
+        background: #682773
+    }
+
+    .profile-button:focus[b-jnknx40e6k] {
+        background: #682773;
+        box-shadow: none
+    }
+
+    .profile-button:active[b-jnknx40e6k] {
+        background: #682773;
+        box-shadow: none
+    }
+
+    .opdtoprow[b-jnknx40e6k] {
+        height: 3rem;
+        display: flex;
+        width: 100%;
+        background: linear-gradient( to right bottom, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3) );
+        position: static;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 1px 0 1px 1px rgba(0, 0, 0, 0.1);
+    }
+.brand[b-jnknx40e6k] {
+    flex: 1;
+    justify-content: flex-start;
+    padding-left: 40px;
+    color:#000000;
+    font-weight:900;
+}
+
+.nav-item[b-jnknx40e6k] {
+    font-size: 0.8rem;
+   
+}
+
+   
+    .nav-item[b-jnknx40e6k]  a {
+        color: #232121;
+        border-radius: 4px;
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+        line-height: 2.5rem;
+    }
+
+        .nav-item[b-jnknx40e6k]  a.active {
+            /*background-color: rgba(255,255,255,0.60);*/
+            background-color:#3f8ef9;
+            color: white;
+            font-weight: 700;
+          
+        }
+
+        .nav-item[b-jnknx40e6k]  a:hover {
+            /* background-color: rgba(255,255,255,0.1);*/
+            background-color: #3f8ef9;
+            color: white;
+            font-weight: 700;
+           
+        }
+.dropdown[b-jnknx40e6k] {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content[b-jnknx40e6k] {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 180px;
+    text-align: center;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    right: 0;
+    font-size: 14px;
+}
+
+    /* Links inside the dropdown */
+    .dropdown-content a[b-jnknx40e6k] {
+        color: #3f8ef9;
+       /* padding-top: 14px;
+        padding-bottom: 14px;*/
+        text-decoration: none;
+        display: block;
+    }
+
+        /* Change color of dropdown links on hover */
+        .dropdown-content a:hover[b-jnknx40e6k] {
+            background-color: #3f8ef9;
+            color: white;
+           /* padding-bottom: 14px;*/
+        }
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content[b-jnknx40e6k] {
+    display: block;
+  
+}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .btn[b-jnknx40e6k] {
+    background-color: #3f8ef9;
+    color:white;
+}
+

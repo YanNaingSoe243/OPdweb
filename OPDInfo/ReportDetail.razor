@@ -1,0 +1,52 @@
+﻿@page "/reportdetail/{Id:int}"
+@page "/reportdetail"
+@inject IJSRuntime JS
+
+@if (ShowConfirm)
+{
+
+    <div class="modal fade show d-block">
+
+
+        <div class="modal-content animate">
+
+            <div class="modal-body" style="padding:0px;display:flex">
+
+                <div class="row bg-white rounded" style="height: 740px; width: 100%;">
+                    <span @onclick="Close" class="close" title="Close Modal">&times;</span>                  
+                        <div class="col-md-2" style="border-right: 1px solid rgba(0, 0, 0, 0.3); height: 740px ">
+                           
+                        </div>
+                        <div class="col-md-8 mt-3">
+                            <div class="d-flex justify-content-around align-items-center experience">
+                                <span>Report Information</span>
+                                <button class="border btn add-experience">
+
+                                    <i class="oi oi-magnifying-glass pr-2"></i>Search
+                                </button>
+
+                            </div>
+
+                        </div>
+                         
+                      
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    protected bool ShowConfirm { get; set; }
+    public void Close()
+    {
+        ShowConfirm = false;
+        // StateHasChanged();
+    }
+    public void Show()
+    {
+        ShowConfirm = true;
+        StateHasChanged();
+    }
+
+}

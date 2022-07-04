@@ -1,0 +1,208 @@
+﻿@layout OPDLayout
+@page "/department"
+@inject IJSRuntime JS
+@inject QRcode qrcode
+@inject IRepositoryT repositoryt
+@inject IAuthenticationService autthenticationservice
+@inject NotificationService notificationService
+@inject IToastService toastService
+<div class="topbar">
+
+    <div class="grid-item2">
+        <input type="text" placeholder="Search.." name="search" @bind="SearchTerm" @bind:event="oninput">
+        <button class="btn btn-info profile-button"><i class="oi oi-magnifying-glass"></i></button>
+    </div>
+    
+        <div class="grid-item3">
+
+            <div class="btn-group">
+                <button class="btn btn-success" @onclick="()=>ShowFrom()">Add</button>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="opdbottom">
+
+        <div style="padding:5px">
+            @if (departments == null)
+            {
+                <div class="spinner"></div>
+
+            }
+            else
+            {
+                <table class="table border" style="font-size:14px">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Department</th>
+                            <th>Description</th>
+
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @if (departments.Count() > 0)
+                        {
+                            account = 1;
+                        }
+                        @foreach (var objperson in departments.Reverse())
+                        {
+                            <tr>
+                                <td>@account</td>
+                                <td>@objperson.Name</td>
+                                <td>@objperson.Description</td>
+
+
+                                <td>
+                                    <div class="btn-group-sm">
+                                        <button class="btn btn-danger"  @onclick="()=>Delete(objperson.OId)">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            account++;
+                        }
+                    </tbody>
+
+                </table>
+                @*@if (!string.IsNullOrEmpty(error))
+                    {
+                        <div class="alert alert-danger mt-3 mb-0">@error</div>
+                    }*@
+            }
+        </div>
+    </div>
+    <AddDepartment @ref="addCategory" EventCallback="AddData"></AddDepartment>
+
+    @code {
+        protected AddDepartment addCategory { get; set; }
+
+        int account = 1;
+        private string error;
+        protected override async Task OnInitializedAsync()
+        {
+
+            await load();
+
+        }
+
+        protected void AddCategory()
+        {
+            addCategory.Show();
+
+        }
+
+        protected IEnumerable<Department> departments { get; set; }
+        async Task load()
+        {
+
+            // persons = await service.persons.GetAsync(pageindx, pagesize);
+            departments = await repositoryt.depart.GetAsync();
+
+
+
+
+        }
+        public async Task ShowFrom()
+        {
+            try
+            {
+
+                addCategory.Show();
+
+            }
+            catch (Exception Ex)
+            {
+
+            }
+
+        }
+        public async Task AddData(Department data)
+        {
+            try
+            {
+                if (data != null)
+                {
+                    var obj = departments.FirstOrDefault(obj => obj.OId == data.OId);
+                    if (obj != null)
+                    {
+                        var ilist = departments.ToList();
+                        ilist.Remove(obj);
+
+                        //patients = patients.Except(obj).ToList();
+
+                        departments = ilist;
+                    }
+                    await repositoryt.depart.UpsertAsync(data);
+                }
+
+
+            }
+            catch (Exception Ex)
+            {
+
+            }
+            finally
+            {
+                var ilist = departments.ToList();
+                ilist.Add(data);
+                departments = ilist.ToList();
+            }
+
+            StateHasChanged();
+        }
+        public async Task Delete(string id)
+        {
+            try
+            {
+                if (id != null)
+                {
+                    var obj = departments.FirstOrDefault(obj => obj.OId == id);
+                    if (obj != null)
+                    {
+                        var ilist = departments.ToList();
+                        ilist.Remove(obj);
+
+
+
+                        departments = ilist;
+                    }
+                    await repositoryt.depart.DeleteAsync(id);
+                }
+
+
+            }
+            catch (Exception Ex)
+            {
+                //NotificationService.Notify(NotificationSeverity.Error, $"Error", $"Unable to create new Branch!");
+            }
+            await load();
+        }
+        private string searchTerm;
+        protected string SearchTerm
+        {
+            get { return searchTerm; }
+            set { searchTerm = value; Search(); }
+        }
+        protected async void Search()
+        {
+            if (searchTerm != "")
+            {
+                departments = departments.Where(obj => obj.Name == searchTerm || obj.Description.Contains(searchTerm)).ToList();
+            }
+            else
+            {
+                load();
+            }
+
+            StateHasChanged();
+
+        }
+
+
+
+    }
+

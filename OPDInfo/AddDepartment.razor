@@ -1,0 +1,96 @@
+﻿@if (ShowConfirmation)
+{
+    <div class="modal fade show d-block">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Department</h5>
+                    <button type="button" class="close" @onclick="()=>Close()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+
+                    <div class="form-group row p-5">
+                        <label class="col-form-label">
+                            Department Name
+                        </label>
+
+                        <input type="text" @bind-value="data.Name" class="form-control" />
+                        <label class="col-form-label">
+                            Description
+                        </label>
+                        @*<div class="col-sm-7">*@
+
+                        <input type="text" @bind-value="data.Description" class="form-control" />
+
+                    </div>
+
+                 
+                     
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @onclick="()=>Close()">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="()=>OnConfirmationChange(data)">Save</button>
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+
+   
+
+
+}
+
+@code {
+
+    protected bool ShowConfirmation { get; set; }
+    [Parameter]
+    public Department data { get; set; }
+    ElementReference Model { get; set; }
+    [Parameter]
+    public int Id { get; set; }
+    public string PageHeader { get; set; }
+    public void Show()
+    {
+        ShowConfirmation = true;
+
+        PageHeader = "Department Create";
+        data = new Department();
+    }
+    public void Close()
+    {
+        ShowConfirmation = false;
+        StateHasChanged();
+    }
+
+
+
+    protected override async System.Threading.Tasks.Task OnInitializedAsync()
+    {
+        data = new Department();
+
+
+    }
+
+    [Parameter]
+
+    public EventCallback<Department> EventCallback { get; set; }
+
+
+    protected async Task OnConfirmationChange(Department value)
+    {
+        ShowConfirmation = true;
+        await EventCallback.InvokeAsync(value);
+        data = new Department();
+    }
+
+
+}

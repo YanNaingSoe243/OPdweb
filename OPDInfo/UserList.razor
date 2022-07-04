@@ -1,0 +1,208 @@
+﻿@layout OPDLayout
+@page "/userlist"
+@inject IJSRuntime JS
+@inject QRcode qrcode
+@inject IRepositoryT repositoryt
+@inject IAuthenticationService autthenticationservice
+@inject NotificationService notificationService
+@inject IToastService toastService
+<div class="topbar">
+    <div class="grid-item1">
+        <select class="PageSize" @onchange="ChangePageSize" id="PageSize" name="PageSize">
+            <option value="0">All</option>
+            <option value="1">Allow</option>
+            <option value="2">NotAllow</option>
+
+        </select>
+    </div>
+    <div class="grid-item2">
+        <input type="text" placeholder="Search.." name="search" @bind="SearchTerm" @bind:event="oninput">
+        <button class="btn btn-info profile-button"><i class="oi oi-magnifying-glass"></i></button>
+    </div>
+
+</div>
+<div class="opdbottom">
+
+    <div style="padding:5px">
+        @if (users == null)
+        {
+            <div class="spinner"></div>
+
+        }
+        else
+        {
+            <table class="table border" style="font-size:14px">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Password</th>
+                        <th>RegisterDate</th>
+                        <th>Staff Role</th>
+                        <th>department</th>
+                        <th>Permition</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @if (users.Count() > 0)
+                    {
+                        account = 1;
+                    }
+                    @foreach (var objperson in users.Reverse())
+                    {
+                        <tr>
+                            <td>@account</td>
+                            <td>@objperson.FullName</td>
+                            <td>@objperson.Email</td>
+                            <td>@objperson.ConfirmPassword</td>
+                            <td>@objperson.RegisterDate</td>
+                            <td>
+
+                                <select class="form-control" @bind="@objperson.role">
+
+                                    @foreach (StaffRoleEnum obj in Enum.GetValues(typeof(StaffRoleEnum)))
+                                    {
+                                        <option value="@obj">@obj</option>
+                                    }
+                                </select>
+
+
+                            </td>
+
+                            <td>
+                                @if (departments.Count() > 0)
+                                {
+                                    <select class="form-control" @bind="@objperson.department">
+
+                                        @foreach (Department obj in departments)
+                                        {
+                                            <option value="@obj.Name">@obj.Name</option>
+                                        }
+
+                                    </select>
+                                }
+                                else
+                                {
+                                    @objperson.department
+                                }
+                            </td>
+                            <td>
+                                <select class="form-control" @bind="@objperson.Permition">
+
+                                    @foreach (PermisionStatus obj in Enum.GetValues(typeof(PermisionStatus)))
+                                    {
+                                        <option value="@obj">@obj</option>
+                                    }
+
+                                </select>
+                            </td>
+                            <td>
+                                <div class="btn-group-sm">
+                                    <button class="btn btn-warning" @onclick="@(e=>EditCharg(objperson))">Allow</button>
+                                </div>
+                            </td>
+                        </tr>
+                        account++;
+                    }
+                </tbody>
+
+            </table>
+            @*@if (!string.IsNullOrEmpty(error))
+                {
+                    <div class="alert alert-danger mt-3 mb-0">@error</div>
+                }*@
+        }
+    </div>
+</div>
+
+
+@code {
+
+    [Inject]
+    public Blazor.DownloadFileFast.Interfaces.IBlazorDownloadFileService BlazorDownloadFileService { get; set; }
+    int account = 1;
+    private string error;
+    protected IEnumerable<Department> departments { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+
+        await load();
+
+    }
+    protected async Task ChangePageSize(ChangeEventArgs e)
+    {
+        int value = Convert.ToInt32(e.Value);
+        //await Load();
+        if (value == 2)
+        {
+
+            users = users.Where(obj => obj.Permition == PermisionStatus.False).ToList();
+        }
+        else if (value == 1)
+        {
+            users = users.Where(obj => obj.Permition == PermisionStatus.True).ToList();
+        }
+
+        StateHasChanged();
+
+    }
+
+    protected IEnumerable<SiginUp> users { get; set; }
+    async Task load()
+    {
+
+        // persons = await service.persons.GetAsync(pageindx, pagesize);
+        users = await autthenticationservice.UserList();
+
+        departments = await repositoryt.depart.GetAsync();
+
+
+    }
+    private string searchTerm;
+    protected string SearchTerm
+    {
+        get { return searchTerm; }
+        set { searchTerm = value; Search(); }
+    }
+    protected async void Search()
+    {
+        if (searchTerm != "")
+        {
+            users = users.Where(obj => obj.Email == searchTerm || obj.FullName.Contains(searchTerm)).ToList();
+        }
+        else
+        {
+            load();
+        }
+
+        StateHasChanged();
+
+    }
+    async void EditCharg(SiginUp editdiagnosis)
+    {
+
+        try
+        {
+            error = "";
+
+            var user = await autthenticationservice.Update(editdiagnosis);
+            toastService.ShowSuccess("Updated Data ", "Congratulations!");
+
+        }
+        catch (Exception ex)
+        {
+            ;
+            error = ex.ToString();
+            notificationService.Notify(new NotificationMessage { Style = "position: fixed;bottom: 0px; ", Severity = NotificationSeverity.Success, Summary = "Success Summary", Detail = error, Duration = 2000 });
+        }
+
+        notificationService.Notify(new NotificationMessage { Style = "position: fixed;bottom: 0px; ", Severity = NotificationSeverity.Success, Summary = "Success Summary", Detail = "User Allowed", Duration = 2000 });
+        StateHasChanged();
+
+    }
+
+
+}

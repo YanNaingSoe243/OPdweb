@@ -1,0 +1,14 @@
+.dashtop[b-iyuqbfscn5] {
+    margin: 10px 0px 10px 0px;
+    /*background-color: white;*/
+    border-radius: 10px;
+    height: 150px;
+    background: linear-gradient( to right bottom, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3) );
+}
+.dashbottom[b-iyuqbfscn5] {
+    margin: 10px 0px 10px 0px;
+    border-radius: 5px;
+    height: 530px;
+    background: linear-gradient( to right bottom, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3) );
+    overflow-y: visible;
+}

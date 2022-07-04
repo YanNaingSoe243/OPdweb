@@ -1,0 +1,124 @@
+﻿
+@page "/login"
+@inject NavigationManager UriHelper
+@inject IAuthenticationService  AuthenticationService
+
+@inject NotificationService notificationService
+<div class="login">
+    @*<div class="logindispy">
+            <label>aa</label>
+            <input />
+        </div>*@
+    <div class="container">
+        <div class="row py-5 mt-4 align-items-center">
+            <!-- For Demo Purpose -->
+            <div class="col-md-6 pr-lg-5 mb-5 mb-md-0">
+                <img src="css/img/Login2.png" alt="" class="img-fluid mb-3 d-none d-md-block" />
+                <h1>Sign In  an Account</h1>
+                @* <p class="font-italic text-muted mb-0">Tele-medicine and  AI  Medical Diagnosis in Picture Archiving and Communication System (AI-PACS)   </p>*@
+                <p class="font-italic text-muted">
+                    Create By <a href="#" class="text-muted">
+                        <u>Yan Naing Soe & Kyaw Min Thu</u>
+                    </a>
+                </p>
+            </div>
+
+            <!-- Registeration Form -->
+            <div class="col-md-7 col-lg-6 ml-auto">
+                <form action="#">
+                    <div class="row">
+
+                        <!-- Email Address -->
+                        <div class="input-group col-lg-12 mb-4">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-white px-4 border-md border-right-0">
+                                    <i class="oi oi-envelope-closed text-muted"></i>
+                                    @*<i class="fa fa-envelope text-muted"></i>*@
+                                </span>
+                            </div>
+                            <input id="email" @bind-value="siginmodel.Email" type="email" name="email" placeholder="Email Address" class="form-control bg-white border-left-0 border-md">
+                        </div>
+
+
+
+                        <!-- Password -->
+                        <div class="input-group col-lg-12 mb-4">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-white px-4 border-md border-right-0">
+                                    <i class="oi oi-lock-locked text-muted"></i>
+                                    @*<i class="fa fa-lock text-muted"></i>*@
+                                </span>
+                            </div>
+                            <input id="password" type="password" @bind-value="siginmodel.Password" name="password" placeholder="Password" class="form-control bg-white border-left-0 border-md">
+                        </div>
+
+
+
+                        <!-- Submit Button -->
+                        <div class="form-group col-lg-12 mx-auto mb-0">
+                            <a href="#" class="btn btn-primary btn-block py-2" style="background-color: #660080" @onclick="LoginAccount">
+                                <span class="font-weight-bold">Sign In</span>
+                            </a>
+                        </div>
+
+                        <!-- Divider Text -->
+                        <div class="form-group col-lg-12 mx-auto d-flex align-items-center my-4">
+                            <div class="border-bottom w-100 ml-5"></div>
+                            <span class="px-2 small text-muted font-weight-bold text-muted">OR</span>
+                            <div class="border-bottom w-100 mr-5"></div>
+                        </div>
+
+                        <div class="text-center w-100">
+                            <p class="text-muted font-weight-bold">Already Registered? <a href="register" class="text-primary ml-2">Register</a></p>
+                        </div>
+
+                    </div>
+                    @if (!string.IsNullOrEmpty(error))
+                    {
+                        <div class="alert alert-danger mt-3 mb-0">@error</div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    SiginModel siginmodel { get; set; }
+    // LoginResult User { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        siginmodel = new SiginModel();
+        //  User = new LoginResult();
+    }
+
+    private string error;
+    private async void LoginAccount()
+    {
+
+
+
+        try
+        {
+            LoginResult User = await AuthenticationService.Login(siginmodel);
+            if (User.jwtBearer != null && User.jwtBearer != "")
+            {
+              
+                await Task.Run(() => { UriHelper.NavigateTo("opdpage"); });
+            }
+            else
+            {
+                error = "Email and Password are  Not Match....";
+                notificationService.Notify(new NotificationMessage { Style = "position: fixed;bottom: 0px; ", Severity = NotificationSeverity.Success, Summary = "Success Summary", Detail = error, Duration = 2000 });
+            }
+
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+            notificationService.Notify(new NotificationMessage { Style = "position: fixed;bottom: 0px; ", Severity = NotificationSeverity.Error, Summary = "Error Summary", Detail =error, Duration = 2000 });
+
+        }
+        //StateHasChanged();
+    }
+}

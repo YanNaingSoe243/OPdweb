@@ -1,0 +1,82 @@
+/*.model-content {*/
+    /*background-color: #fefefe;*/
+    /* margin: 5px auto;*/
+    /*border: 1px solid #888; 
+    border-radius: 10px;
+}*/
+
+.close[b-5pex69t6fa] {
+    position: absolute;
+    right: 15px;
+    top: 0;
+    color: #000;
+    font-size: 35px;
+    font-weight: bold;
+}
+
+    .close:hover[b-5pex69t6fa], .close:focus[b-5pex69t6fa] {
+        color: red;
+        cursor: pointer;
+    }
+
+.animate[b-5pex69t6fa] {
+    -webkit-animation: animatezoom o.6s;
+    animation: animatezoom-b-5pex69t6fa 0.6s;
+}
+
+@-webkit-keyframes animatezoom {
+    from {
+        -webkit-transform: scale(0)
+    }
+
+    to {
+        -webkit-transform: scale(1)
+    }
+}
+
+@keyframes animatezoom-b-5pex69t6fa {
+    from {
+        transform: scale(0)
+    }
+
+    to {
+        transform: scale(1)
+    }
+}
+
+.profile-button[b-5pex69t6fa] {
+    background: rgb(99, 39, 120);
+    box-shadow: none;
+    border: none
+}
+
+    .profile-button:hover[b-5pex69t6fa] {
+        background: #682773
+    }
+
+    .profile-button:focus[b-5pex69t6fa] {
+        background: #682773;
+        box-shadow: none
+    }
+
+    .profile-button:active[b-5pex69t6fa] {
+        background: #682773;
+        box-shadow: none
+    }
+
+.back:hover[b-5pex69t6fa] {
+    color: #682773;
+    cursor: pointer
+}
+
+.labels[b-5pex69t6fa] {
+    font-size: 11px
+}
+
+.add-experience:hover[b-5pex69t6fa] {
+    background: #BA68C8;
+    color: #fff;
+    cursor: pointer;
+    border: solid 1px #BA68C8
+}
+

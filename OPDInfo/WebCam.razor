@@ -1,0 +1,110 @@
+﻿@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+@if (ShowConfirm)
+{
+    <div class="modal fade show d-block">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content animate">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Take Photo</h5>
+                    <button type="button" class="close" @onclick="()=>Close()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="padding:10px">
+
+                    <div>
+                        <video id="@options.VideoID"
+                               width="@options.Width">
+                            Video stream not available.
+                        </video>
+                        <canvas class="d-none" id="@options.CanvasID"
+                                width="@options.Width"
+                                height="360">
+                        </canvas>
+                    </div>
+
+                    <div class="btn-group-lg">
+                        <button class="btn btn-info" @onclick="Start">Start</button>
+                        <button class="btn btn-success" @onclick="CaptureFrame">Capture</button>
+                    </div>
+                    <div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+}
+
+@code {
+    private Task<IJSObjectReference> _module;
+    private Task<IJSObjectReference> Module => _module ??= JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/webcam.js").AsTask();
+
+    WebCamOptions options = new WebCamOptions()
+    {
+        CanvasID = "canvas",
+        VideoID = "video"
+    };
+    protected async override void OnInitialized()
+    {
+
+        options.Width = 480;
+
+
+    }
+    
+
+    public async Task Start()
+    {
+        var module = await Module;
+        await module.InvokeVoidAsync("onStart", options);
+    }
+
+    [Parameter]
+    public EventCallback<string> eventCallback { get; set; }
+    bool ShowConfirm { get; set; }
+
+    //async Task ChangeEvent(string  value)
+    //{
+    //    //isSelected = false;
+    //    ShowConfirm = false;
+    //    await EventCallback.InvokeAsync(value);
+    //}
+    public void Show()
+    {
+        ShowConfirm = true;
+        StateHasChanged();
+    }
+    public void Close()
+    {
+        ShowConfirm = false;
+        StateHasChanged();
+    }
+    private async Task CaptureFrame()
+    {
+        var module = await Module;       
+        await module.InvokeAsync<String>("getFrame", options, DotNetObjectReference.Create(this));
+    }
+    [JSInvokable]
+    public async void ProcessImage(string imageString)
+    {
+        var imageData = imageString.Split(',')[1];
+        ShowConfirm = false;
+        await eventCallback.InvokeAsync(imageData);
+    }
+    public async ValueTask DisposeAsync()
+    {
+        if (_module != null)
+        {
+            var module = await _module;
+            await module.DisposeAsync();
+        }
+    }
+
+}

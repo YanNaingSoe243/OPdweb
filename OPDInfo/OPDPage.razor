@@ -1,0 +1,434 @@
+﻿@layout OPDLayout
+@inject HttpClient Http
+@page "/opdpage"
+@inherits PatitentsComponent
+@inject ExportService exportService
+@inject IRepositoryT repositoryt
+@attribute [Authorize]
+@inject IJSRuntime JS
+@*@inject PersonMongo service*@
+
+
+
+<div class="topbar">
+    <div class="grid-item1">
+        <select class="PageSize" @onchange="ChangePageSize" id="PageSize" name="PageSize">
+            <option value="6">Page Size </option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="80">80</option>
+        </select>
+    </div>
+    <div class="grid-item2">
+        <input type="text" placeholder="Search.." name="search" @bind="SearchTerm" @bind:event="oninput">
+        <button class="btn btn-info profile-button"><i class="oi oi-magnifying-glass"></i></button>
+        @if (patients != null)
+        {
+            <label class="labels" style="padding-left:15px;color:white">Total Row: @patients.Count()</label>
+        }
+    </div>
+
+    <div class="grid-item3">
+
+        <div class="btn-group">
+            <button class="btn btn-success" @onclick="()=>ShowReprotDetail()">ToReport</button>
+            @*<button class="btn btn-primary">ToDate</button>*@
+            <button class="btn btn-warning" @onclick="()=>ExportToExcel()">ToExcel</button>
+            <button class="btn btn-info" @onclick="()=>AddPatitent()">New Note</button>
+        </div>
+
+    </div>
+
+
+</div>
+<div class="opdbottom" @ref="ActiveItem" @onscroll="OnScroll">
+
+    <div style="padding:5px">
+        @if (patients == null)
+        {
+            <div class="spinner"></div>
+
+        }
+        else
+        {
+            <table class="table border" style="font-size:14px">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>NRC</th>
+                        <th>Date</th>
+                        <th>Pluse</th>
+                        <th>BP</th>
+                        <th>Temp</th>
+                        <th>Weight</th>
+                        <th>Case</th>
+                        <th>Diseases</th>
+                        <th>Patient Type</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (patients.Count() > 0)
+                    {
+                        account = 1;
+                    }
+
+                    @foreach (var objperson in patients.Reverse())
+                    {
+                        <tr>
+                            <td>
+                                <div class="tabledropdown">
+                                    (@account) <button class="btn">...</button>
+
+                                    <div class="tabledropdown-content">
+
+                                        <RadzenCard Style="width:400px;margin:5px">
+                                            <div class="d-flex justify-content-between align-items-center experience">
+                                                <img style="width: 100px; height: 100px; border: 1px solid #808080; object-fit:cover;margin:2px;" src="data:image/png;base64,@objperson.PId?.Photo">
+
+                                                <div class="btn-group-sm">
+                                                    <button class="btn btn-info" @onclick="(e=>EditPerson(objperson))">
+                                                        <i class="oi oi-pencil pr-2"></i>Edit
+                                                    </button>
+                                                    <button class="btn btn-danger">
+                                                        <i class="oi oi-delete pr-2"></i>Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            @if (objperson != null)
+                                            {
+                                                <div class="row justify-content-between mt-2">
+
+                                                    <div class="col-md-12">
+                                                        <label class="labels">Complaint</label>
+                                                        <input type="text" class="form-control" placeholder="enter phone no" value="@objperson.Complaint">
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label class="labels">Examination</label>
+                                                        <input type="text" class="form-control" placeholder="enter phone no" value="@objperson.Examination">
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label class="labels">Investigation</label>
+                                                        <input type="text" class="form-control" placeholder="enter phone no" value="@objperson.Investigation">
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label class="labels">Charge Fee </label>
+                                                        <input type="text" class="form-control" placeholder="enter phone no" value="@objperson.ChargeFee">
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label class="labels">Diagnosis Fee</label>
+                                                        <input type="text" class="form-control" placeholder="enter home no" value="@objperson.DiagnosisFee">
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label class="labels">Drug Fee</label>
+                                                        <input type="text" class="form-control" placeholder="enter home no" value="@objperson.DrugFee">
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label class="labels">Tax</label>
+                                                        <input type="text" class="form-control" placeholder="enter home no" value="@objperson.Tax">
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label class="labels">Total Amount</label>
+                                                        <input type="text" class="form-control" placeholder="enter home no" value="@objperson.GrandTotal">
+                                                    </div>
+                                                </div>
+
+
+                                            }
+
+
+
+                                        </RadzenCard>
+
+
+                                    </div>
+                                </div>
+                                @*<div class="btn-group-sm">
+                                        <button class="btn btn-danger">Delete</button>
+                                        <button class="btn btn-warning">Edit</button>
+                                        <button class="btn btn-info">View</button>
+
+                                    </div>*@
+                            </td>
+
+                            <td>@objperson.PId.FullName</td>
+                            <td>@objperson.PId.Gender</td>
+                            <td>@objperson.PId.NRC</td>
+                            @if (objperson != null)
+                            {
+                                <td>@objperson.RegisterDate</td>
+
+
+                                <td>@objperson.PulseRate</td>
+                                <td>
+                                    @objperson.UpperBloodPressure/
+                                    @objperson.LowerBloodPressure
+                                </td>
+                                <td>@objperson.Temparture</td>
+                                <td>@objperson.Weight</td>
+                                <td>@objperson.OPTCase</td>
+                                <td>@objperson.Department</td>
+                                <td>@objperson.PatientType</td>
+                                <td>@objperson.patientStatus</td>
+
+                            }
+
+
+                        </tr>
+                        account++;
+                    }
+                </tbody>
+            </table>
+        }
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger mt-3 mb-0">@error</div>
+        }
+    </div>
+</div>
+@if (upload == true)
+{
+    <div class="spinner"></div>
+
+}
+<PatitentsInfor @ref="addPatiten" EventCallback="AddData"></PatitentsInfor>
+
+<ReportDetail @ref="reportDetail"></ReportDetail>
+
+@code {
+
+
+    private List<ReportDaily> ReporstdailyList = new List<ReportDaily>();
+    [Inject]
+    public Blazor.DownloadFileFast.Interfaces.IBlazorDownloadFileService BlazorDownloadFileService { get; set; }
+    int account = 1;
+    protected IEnumerable<Patient> patients { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+
+        await load();
+
+    }
+    //protected override async Task OnAfterRenderAsync(bool firstRender)
+    //{
+    //    if (firstRender)
+    //        await JSRuntime.InvokeVoidAsync("sayHi", ActiveItem);
+    //}
+
+    protected async Task ChangePageSize(ChangeEventArgs e)
+    {
+        pagesize = Convert.ToInt32(e.Value);
+        //await Load();
+    }
+    int pageindx = 1;
+    int pagesize = 20;
+    private string error;
+
+    public   async Task load()
+    {
+
+        try
+        {
+
+            patients = await repositoryt.patient.GetAsync(pageindx, pagesize);
+
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+
+
+
+
+
+    }
+    private string searchTerm;
+    protected string SearchTerm
+    {
+        get { return searchTerm; }
+        set { searchTerm = value; Search(); }
+    }
+    protected async void Search()
+    {
+        if (searchTerm != "")
+        {
+            var   Person_obj = await repositoryt.persons.GetAsync(searchTerm,0);
+            if(Person_obj.Count()>0)
+            {
+                List<Patient> vpatientlist = new List<Patient>();
+                foreach(VirtualPerson p in Person_obj)
+                {
+                    var patientobj= await repositoryt.patient.GetAsync(p.PId,1);
+                    vpatientlist.AddRange(patientobj);
+                }
+
+                patients = vpatientlist;
+            }
+        }
+        else
+        {
+            pageindx = 1;
+            patients = await repositoryt.patient.GetAsync(pageindx, pagesize);
+        }
+
+        StateHasChanged();
+
+    }
+
+    void report()
+    {
+
+        ReporstdailyList = patients.Where(obj => obj.RegisterDate == DateTime.Now).GroupBy(n => n.PId.Gender)
+              .Select(n => new ReportDaily
+              {
+                  Name = n.First().PId.Gender.ToString(),
+                  Account = n.Count()
+              }).ToList();
+
+
+        //var malereport = persons.Where(obj => obj.patients.Last().RegisterDate == DateTime.Today).GroupBy(n => n.Regiment)
+        //     .Select(n => new ReportDaily
+        //     {
+        //         Name = n.First().Regiment,
+        //         Account = n.Count()
+        //     }).ToList();
+        //  ReporstdailyList.AddRange(malereport);
+
+
+
+    }
+    protected void EditPerson(Patient p)
+    {
+
+
+        addPatiten.EditPerson(p);
+
+
+    }
+    public async System.Threading.Tasks.Task AddData(Patient data)
+    {
+        try
+        {
+
+            if (data != null)
+            {
+
+
+                //  load();
+
+                var obj = patients.FirstOrDefault(obj => obj.OId == data.OId);
+                if (obj != null)
+                {
+                    var ilist = patients.ToList();
+                    ilist.Remove(obj);
+
+                    //patients = patients.Except(obj).ToList();
+
+                    patients = ilist;
+                }
+
+
+
+
+                //var obj = patients.Where(obj => obj.OId == data.OId);
+
+                //patients = patients.Except(obj).ToList();
+                //var ilist = patients.ToList();
+                //ilist.Add(data);
+                //patients = ilist.ToList();
+                //if (obj != null)
+                //{
+                //    obj = data;
+                //    //.CreateAsync(data);
+                //}
+                //else
+                //{
+                //    var ilist = patients.ToList();
+                //    ilist.Add(data);
+                //    patients = ilist.ToList();
+                //    // service.CreateAsync(data);
+
+                //}
+
+
+
+            }
+
+
+        }
+        catch (Exception Ex)
+        {
+            //NotificationService.Notify(NotificationSeverity.Error, $"Error", $"Unable to create new Branch!");
+        }
+        finally
+        {
+            var ilist = patients.ToList();
+            ilist.Add(data);
+            patients = ilist.ToList();
+            report();
+            // StateHasChanged();
+        }
+        StateHasChanged();
+
+    }
+    bool upload = false;
+
+    private Task<IJSObjectReference> _module;
+    private Task<IJSObjectReference> Module => _module ??= JS.InvokeAsync<IJSObjectReference>("import", "./js/webcam.js").AsTask();
+    ElementReference ActiveItem;
+    public async Task OnScroll()
+    {
+        var module = await Module;
+        await module.InvokeAsync<String>("sayHi", ActiveItem, DotNetObjectReference.Create(this));
+
+
+
+    }
+    [JSInvokable]
+    public async void ScrollDataLoad(string  _upload)
+    {
+        if(_upload=="true")
+        {
+            try
+            {
+                upload = true;
+                pageindx++;
+                var obj = await repositoryt.patient.GetAsync(pageindx, pagesize);
+
+                var ilist = patients.ToList();
+                ilist.AddRange(obj);
+                patients = ilist.ToList();
+                StateHasChanged();
+            }
+            catch (Exception Ex)
+            {
+                upload = false;
+                // NotificationService.Notify(NotificationSeverity.Error, $"Error", $"Unable to create new Branch!");
+            }
+            finally
+            {
+                upload = false;
+            }
+        }
+
+    }
+    public async Task ExportToExcel()
+    {
+        if (patients.Count() > 0)
+        {
+            var stream = exportService.ToExcel(patients.AsQueryable().Select(obj => new { QRCode = obj.PId, obj.PId.FullName, obj.PId.NRC, obj.PId.Gender, }));
+            var task = await BlazorDownloadFileService.DownloadFileAsync("Export.xlsx", stream, "application/octet-stream");
+        }
+    }
+    class ReportDaily
+    {
+        public string Name { get; set; }
+        public int Account { get; set; }
+    }
+}
+

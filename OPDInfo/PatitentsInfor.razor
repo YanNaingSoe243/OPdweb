@@ -1,0 +1,1235 @@
+﻿@page "/patitentsinfor/{Id:int}"
+@page "/patitentsinfor"
+@inject IJSRuntime JS
+@inject QRcode qrcode
+@inject IRepositoryT repositoryt
+@inject IMapper _mapper;
+@inject IAuthenticationService  AuthenticationService
+@*@inject PersonMongo service*@
+@if (ShowConfirm)
+{
+
+
+    <div class="modal fade show d-block">
+
+
+        <div class="modal-content animate" style="background: #660080;">
+
+            <div class="modal-body" style="padding: 0px; display: flex; ">
+
+                <div class="jumbotron rounded  ml-2 mr-2" style="height: 750px; width: 100%; overflow-y: auto; padding: 8px; box-shadow: 3px 0 3px 3px rgba(0, 0, 0, 0.3); background: linear-gradient( to right bottom, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3) );">
+                    <span @onclick="Close" class="close" title="Close Modal">&times;</span>
+                    <div class="row mt-4 justify-content-center" style="margin:0px;padding:0px;">
+                        <div class="col-md-3">
+                            <div class="d-flex flex-column align-items-center text-center">
+
+                                <img class=" border" style="width: 250px; height: 250px; border: 1px solid #808080; object-fit:cover" src="data:image/png;base64,@person?.Photo" @onclick="()=>WebCamShow()">
+
+
+                            </div>
+                            <div class="d-flex flex-column align-items-center text-center mt-3">
+                                <img style="width:130px;height:130px" src="data:image/png;base64,@person?.QRCode">
+                                <span class="font-weight-bold">@person?.PId</span>
+                                <div class="btn-group">
+                                    <button class="border btn add-experience" @onclick="()=>PrintQRCode()">
+                                        <i class="oi oi-print pr-2"></i>Print
+                                    </button>
+                                    <button class="border btn add-experience" @onclick="(() => ShowScanBarcode = !ShowScanBarcode)">
+                                        <i class="oi oi-print pr-2"></i>Scan
+                                    </button>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+
+                        <div class="col-md-4 mr-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4 class="text-right">Profile Information</h4>
+                                @*<button @onclick="()=>searchrecordShow()" class="border btn add-experience">
+                                        <i class="oi oi-magnifying-glass pr-2"></i>Search
+                                    </button>*@
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-6"><label class="labels">Firt Name</label><input type="text" class="form-control" placeholder="first name" @bind-value="person.FirstName"></div>
+                                <div class="col-md-6"><label class="labels">Last Name</label><input type="text" class="form-control" placeholder="Last name" @bind-value="person.LastName"></div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-12"><label class="labels">NRC Number</label><input type="text" class="form-control" placeholder="enter NRC number " @bind-value="person.NRC"></div>
+                                <div class="col-md-12"><label class="labels">EmailAddress</label><input type="text" class="form-control" placeholder="enter Email Address" @bind-value="person.EmailAddress"></div>
+                                <div class="col-md-12"><label class="labels">DateOfBirth</label><input type="date" class="form-control" placeholder="enter Date of Birth" @bind-value="person.DateOfBirth"></div>
+
+
+                            </div>
+                            <div class="row mt-3 justify-content-md-between">
+                                <div class="col-md-5">
+                                    <input type="checkbox" @onchange="CheckActive" checked="checked" name="Active"> Active Status
+                                </div>
+                                <div class="btn-group">
+                                    <button class="btn btn-danger" @onclick="NewPerson">
+                                        <i class="oi oi-person pr-2"></i>New
+                                    </button>
+                                    <button class="btn btn-primary profile-button" @onclick="SaveProfile">
+                                        <i class="oi oi-circle-check pr-2"></i>Save
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 border pb-2">
+                            <div class="col-md-12">
+                                <label class="labels">BloodGroup</label>
+                                @*<select @bind="@dataItem.PaymentStatus" required>*@
+                                <select class="form-control" @bind="person.BloodType">
+                                    @*<option value="null">Select Payment Status </option>*@
+                                    @foreach (BloodType obj in Enum.GetValues(typeof(BloodType)))
+                                    {
+                                        <option value="@obj">@obj</option>
+                                    }
+                                </select>
+
+                            </div>
+                            <div class="col-md-12">
+                                <label class="labels">Gender</label>
+                                @*<select @bind="@dataItem.PaymentStatus" required>*@
+                                <select class="form-control" @bind="person.Gender">
+                                    @*<option value="null">Select Payment Status </option>*@
+                                    @foreach (GenderType obj in Enum.GetValues(typeof(GenderType)))
+                                    {
+                                        <option value="@obj">@obj</option>
+                                    }
+                                </select>
+
+                            </div>
+                            <div class="col-md-12"><label class="labels">Short Biography</label><textarea style="height:250px" class="form-control" placeholder="Enter Short Biography" @bind="person.ShortBiography"> </textarea></div>
+                            @if (!string.IsNullOrEmpty(error))
+                            {
+                                <div class="alert alert-danger mt-3 mb-0">@error</div>
+                            }
+
+
+                        </div>
+
+
+                    </div>
+                    <div>
+                        <RadzenTabs @bind-SelectedIndex="seletedindex" Change="@ontabchange" style="height:700px; width: 100%; margin: 20px auto;">
+                            <Tabs>
+                                <RadzenTabsItem Text="Address">
+                                    <div class="row mt-1">
+                                        <div class="col-md-4">
+                                            <div class="p-2">
+
+                                                <div class="d-flex justify-content-between align-items-center experience">
+                                                    <span>Person's Address Information</span>
+
+                                                </div>
+                                                <br>
+                                                <div class="col-md-12">
+                                                    <label class="labels">Phone No</label>
+                                                    <input type="text" class="form-control" placeholder="enter phone no" @bind-value="address.PhoneNo">
+                                                </div>
+
+                                                <div class="col-md-12">
+                                                    <label class="labels">Contact No</label>
+                                                    <input type="text" class="form-control" placeholder="enter contact no" @bind-value="address.ContactNo">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+
+                                            <div class="col-md-12">
+                                                <label class="labels">Home No</label>
+                                                <input type="text" class="form-control" placeholder="enter home no" @bind-value="address.HomeNo">
+                                            </div>
+
+                                            <div class="col-md-12">
+                                                <label class="labels">Street Address</label>
+                                                <input type="text" class="form-control" placeholder="enter street address" @bind-value="address.StreetName">
+                                            </div>
+
+                                            <div class="col-md-12">
+                                                <label class="labels">City</label>
+                                                <input type="text" autocomplete="on" class="form-control" placeholder="enter city" @bind-value="address.City">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="row mt-2 ml-1 mr-1">
+                                                <div class="col-md-6"><label class="labels">State/Region</label><input autocomplete="on" type="text" class="form-control" placeholder="enter state/region" @bind-value="address.State"></div>
+                                                <div class="col-md-6"><label class="labels">PostCode</label><input type="text" autocomplete="on" class="form-control" @bind-value="address.Postcode" placeholder="enter postcode"></div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label class="labels">Country</label>
+                                                <input type="text" autocomplete="on" class="form-control" placeholder="enter  country" @bind-value="address.Country">
+                                            </div>
+                                            <br />
+                                            <div class="col-md-12 d-flex  justify-content-end">
+                                                <button class="btn btn-primary profile-button" @onclick="SaveAddress">
+                                                    <i class="oi oi-circle-check pr-2"></i>Save
+                                                </button>
+                                            </div>
+
+                                        </div>
+
+
+                                    </div>
+
+                                    <div class="row mt-4 ml-4">
+
+                                        @foreach (Address address in person.address)
+                                        {
+                                            <RadzenCard Style="width:400px;margin:5px">
+                                                <div class="d-flex justify-content-between align-items-center experience">
+                                                    <span>Contact Information</span>
+                                                    <div class="btn-group-sm">
+                                                        <button class="btn btn-info" @onclick="@(e=>EditAddress(address))">
+                                                            <i class="oi oi-pencil pr-2"></i>Edit
+                                                        </button>
+                                                        <button class="btn btn-danger" @onclick="@(e=>DeleteAddress(address.OId))">
+                                                            <i class="oi oi-delete pr-2"></i>Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="row justify-content-between">
+                                                    <div class="col-md-12">
+                                                        <label class="labels">Phone No</label>
+                                                        <input type="text" class="form-control" placeholder="enter phone no" @bind-value="address.PhoneNo">
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label class="labels">Contact No</label>
+                                                        <input type="text" class="form-control" placeholder="enter contact no" @bind-value="address.ContactNo">
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label class="labels">Home No</label>
+                                                        <input type="text" class="form-control" placeholder="enter home no" @bind-value="address.HomeNo">
+                                                    </div>
+
+                                                    <div class="col-md-12">
+                                                        <label class="labels">Street Address</label>
+                                                        <input type="text" class="form-control" placeholder="enter street address" @bind-value="address.StreetName">
+                                                    </div>
+
+                                                    <div class="col-md-12">
+                                                        <label class="labels">City</label>
+                                                        <input type="text" class="form-control" placeholder="enter city" @bind-value="address.City">
+                                                    </div>
+                                                    <div class="row mt-2 ml-1 mr-1">
+                                                        <div class="col-md-6"><label class="labels">State/Region</label><input type="text" class="form-control" placeholder="enter state/region" @bind-value="address.State"></div>
+                                                        <div class="col-md-6"><label class="labels">PostCode</label><input type="text" class="form-control" @bind-value="address.Postcode" placeholder="enter postcode"></div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label class="labels">Country</label>
+                                                        <input type="text" class="form-control" placeholder="enter  country" @bind-value="address.Country">
+                                                    </div>
+                                                </div>
+
+                                            </RadzenCard>
+                                        }
+
+
+                                    </div>
+
+                                </RadzenTabsItem>
+                                <RadzenTabsItem Text="Patitent Register">
+                                    <div class="row mt-1 justify-content-sm-center">
+
+                                        <div class="col-md-5 mt-0">
+                                            <div class="p-2">
+                                                <div class="d-flex justify-content-between align-items-center experience">
+                                                    <span>Patients Information</span>
+
+                                                </div>
+                                                <div class="row mt-4">
+                                                    <div class="col-md-12"><label class="labels">Register Date</label><input type="date" class="form-control" @bind-value="patient.RegisterDate"></div>
+                                                </div>
+                                                <div class="row mt-3">
+
+                                                    <div class="col-md-12"><label class="labels">Diseases </label><input type="text" autocomplete="on" class="form-control" placeholder="Enter Diseases   Name" @bind-value="patient.Department"></div>
+                                                    <div class="col-md-12"><label class="labels">Age</label><input type="text" class="form-control" placeholder="Enter Age" @bind-value="patient.Age"></div>
+                                                </div>
+                                                <div class="row mt-2">
+                                                    <div class="col-md-6"><label class="labels">Temp</label><input type="text" class="form-control" placeholder="Enter Temparture" @bind-value="patient.Temparture"></div>
+
+                                                    <div class="col-md-6"><label class="labels">Pulse Rate</label><input type="text" class="form-control" placeholder="Pulse Rate" @bind-value="patient.PulseRate"></div>
+                                                </div>
+                                                <div class="row mt-2">
+                                                    <div class="col-md-6"><label class="labels">Upper BP</label><input type="text" class="form-control" placeholder="Enter Upper Blood Pressure" @bind-value="patient.UpperBloodPressure"></div>
+                                                    <div class="col-md-6"><label class="labels">Lower Bp</label><input type="text" class="form-control" placeholder="Enter Lower Blood Pressure" @bind-value="patient.LowerBloodPressure"></div>
+                                                </div>
+                                                <div class="row mt-2">
+                                                    <div class="col-md-6"><label class="labels">Height</label><input type="text" class="form-control" placeholder="Enter Height" @bind-value="patient.Height"></div>
+                                                    <div class="col-md-6"><label class="labels">Weight</label><input type="text" class="form-control" placeholder="Enter a Weight" @bind-value="patient.Weight"></div>
+                                                    <div class="col-md-12">
+                                                        <label class="labels">PatientType</label>
+
+                                                        <select class="form-control" @bind="@patient.PatientType">
+
+                                                            @foreach (PatientType obj in Enum.GetValues(typeof(PatientType)))
+                                                            {
+                                                                <option value="@obj">@obj</option>
+                                                            }
+                                                        </select>
+
+                                                    </div>
+                                                    <div class="col-md-12"><label class="labels">OPD Case</label><textarea style="height:100px" class="form-control" placeholder="Enter OPD  Case" @bind="patient.OPTCase"> </textarea></div>
+                                                    <div class="col-md-12">
+                                                        <label class="labels">PatientStatus</label>
+
+                                                        <select class="form-control" @bind="@patient.patientStatus">
+
+                                                            @foreach (PatientStatus statusobj in Enum.GetValues(typeof(PatientStatus)))
+                                                            {
+                                                                <option value="@statusobj">@statusobj</option>
+                                                            }
+                                                        </select>
+
+                                                    </div>
+                                                </div>
+
+
+
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-5 mt-0">
+                                            <div class="p-2">
+                                                <div class="d-flex justify-content-between align-items-center experience">
+                                                    <span>Refer Information</span>
+                                                    <button class="btn btn-primary profile-button" @onclick="AddPatiten">
+                                                        <i class="oi oi-circle-check pr-2"></i>Save
+                                                    </button>
+
+                                                </div>
+                                                <div class="row mt-3">
+                                                    <div class="col-md-12"><label class="labels">HostipalName</label><input autocomplete="on" type="text" class="form-control" placeholder="Enter Hostipal Name" @bind-value="patient.ReferInfor.HospitalName"></div>
+                                                    <div class="col-md-12"><label class="labels">Refer Date</label><input type="date" class="form-control" @bind-value="patient.ReferInfor.ReferDate"></div>
+                                                </div>
+                                                <div class="row mt-2">
+                                                    <div class="col-md-6"><label class="labels">SamaNumber</label><input type="text" class="form-control" placeholder="Enter Sama Number " @bind-value="patient.ReferInfor.SaMaNumber"></div>
+                                                    <div class="col-md-6">
+                                                        <label class="labels">Doctor Role</label>
+
+                                                        <select class="form-control">
+
+                                                            @foreach (PatientType obj in Enum.GetValues(typeof(PatientType)))
+                                                            {
+                                                                <option value="@obj">@obj</option>
+                                                            }
+                                                        </select>
+
+                                                    </div>
+                                                    <div class="col-md-12"><label class="labels">DoctorName</label><input type="text" class="form-control" placeholder="Doctor Name" @bind-value="patient.ReferInfor.DoctoreName"></div>
+
+                                                    <div class="col-md-12"><label class="labels">Case</label><textarea style="height:100px" class="form-control" placeholder="Enter Case" @bind="patient.ReferInfor.Case"> </textarea></div>
+                                                    <div class="col-md-12"><label class="labels">Description</label><textarea style="height:100px" class="form-control" placeholder="Enter Description" @bind="patient.ReferInfor.Decription"> </textarea></div>
+                                                    <div class="col-md-12"><label class="labels">Contact Information</label><textarea style="height:100px" class="form-control" placeholder="Enter Contact Information" @bind="patient.ReferInfor.ContactInformation"> </textarea></div>
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                </RadzenTabsItem>
+
+                                <RadzenTabsItem Text="Medical Record">
+                                    <div class="row mt-1" style="margin:0px;padding:0px;">
+                                        <div class="col-md-5">
+                                            <table class="table border" style="font-size:12px">
+                                                <thead>
+                                                    <tr>
+                                                        <th>No</th>
+                                                        <th>Register Date </th>
+                                                        <th>Age</th>
+                                                        <th>Diseases</th>
+                                                        <th>Status </th>
+                                                        <th> </th>
+
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if (patients.Count() > 0)
+                                                    {
+                                                        account = 1;
+                                                        @foreach (var objperson in patients.Reverse())
+                                                        {
+                                                            <tr>
+
+                                                                <td>@account</td>
+                                                                <td>@objperson.RegisterDate.ToShortDateString()</td>
+                                                                <td>@objperson.Age</td>
+                                                                <td>@objperson.Department</td>
+
+                                                                <td>@objperson.patientStatus</td>
+                                                                <td>
+                                                                    <div class="btn-group-sm">
+                                                                        <button class="btn btn-danger" @onclick="@(e=>DeletePatitent(objperson.OId))">Delete</button>
+                                                                        <button class="btn btn-info" @onclick="@(e=>EditPatietn(objperson))">Edit</button>
+                                                                        <button class="btn btn-info" @onclick="@(e=>ViewPatietn(objperson))">View</button>
+                                                                    </div>
+                                                                </td>
+
+
+                                                            </tr>
+                                                            account++;
+                                                        }
+                                                    }
+                                                </tbody>
+                                            </table>
+
+                                        </div>
+
+                                        <div class="col-md-7">
+                                            <RadzenTabs TabPosition="TabPosition.Right" Style="font-size:12px;">
+                                                <Tabs>
+                                                    <RadzenTabsItem Text="Management">
+                                                        <div class="row mt-2 justify-content-sm-center">
+                                                            <div class="col-md-12 mt-0">
+                                                                <div class="p-2">
+                                                                    <div class="d-flex justify-content-between align-items-center experience">
+                                                                        <span>Patients Management</span>
+                                                                        <span>Date:@patient.RegisterDate</span>
+                                                                    </div>
+
+                                                                    <div class="row mt-2">
+                                                                        <div class="col-md-12">
+                                                                            <label class="labels">PatientStatus</label>
+
+                                                                            <select class="form-control" @bind="@patient.patientStatus">
+
+                                                                                @foreach (PatientStatus statusobj in Enum.GetValues(typeof(PatientStatus)))
+                                                                                {
+                                                                                    <option value="@statusobj">@statusobj</option>
+                                                                                }
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row mt-4">
+                                                                        <div class="col-md-12">
+                                                                            <label class="labels">Complaint</label>
+                                                                            <textarea style="height:100px" class="form-control" placeholder="Enter Complaint" @bind="patient.Complaint"> </textarea>
+                                                                        </div>
+                                                                    </div>
+
+
+                                                                    <div class="row mt-2">
+                                                                        <div class="col-md-12">
+                                                                            <label class="labels">Surgical</label>
+                                                                            <textarea style="height:100px" class="form-control" placeholder="Enter Complaint" @bind="patient.Surgical"> </textarea>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="row mt-2">
+                                                                        <div class="col-md-12">
+                                                                            <label class="labels">Examination</label>
+                                                                            <textarea style="height:100px" class="form-control" placeholder="Enter Complaint" @bind="patient.Examination"> </textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row mt-2">
+                                                                        <div class="col-md-12">
+                                                                            <label class="labels">Investigation</label>
+                                                                            <textarea style="height:100px" class="form-control" placeholder="Enter Complaint" @bind="patient.Investigation"> </textarea>
+                                                                        </div>
+                                                                    </div>
+
+
+                                                                </div>
+                                                            </div>
+
+
+
+                                                        </div>
+                                                    </RadzenTabsItem>
+                                                    <RadzenTabsItem Text="Drug">
+
+                                                        <div>
+                                                            <div class="d-flex justify-content-between align-items-center experience">
+                                                                <span>Drug Information</span>
+                                                                <button class="btn btn-primary profile-button" @onclick="AddDrug">
+                                                                    <i class="oi oi-circle-check pr-2"></i>Save
+                                                                </button>
+                                                            </div>
+                                                            <div class="row mt-4">
+                                                                <div class="col-md-12">
+                                                                    <label class="labels">DrugName</label>
+                                                                    <div class="input-group mb-3">
+                                                                        <input type="text" autocomplete="on" class="form-control" placeholder="Enter DrugName Name" @bind-value="drug.DrugName">
+                                                                        <div class="input-group-append">
+                                                                            <button class="btn btn-info">
+                                                                                <i class="oi oi-plus pr-2"></i>New
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+
+                                                            </div>
+                                                            <div class="row mt-3">
+
+                                                                <div class="col-md-6"><label class="labels">Quantity </label><input type="text" autocomplete="on" class="form-control" placeholder="Enter Quantity Name" @bind-value="drug.Quantity"></div>
+                                                                <div class="col-md-6"><label class="labels">Strength</label><input type="text" class="form-control" placeholder="Enter Strength" @bind-value="drug.Strength"></div>
+                                                            </div>
+                                                            <div class="row mt-2">
+                                                                <div class="col-md-6"><label class="labels">Group</label><input type="text" class="form-control" placeholder="Enter Group" @bind-value="drug.Group"></div>
+
+                                                                <div class="col-md-6"><label class="labels">Form</label><input type="text" class="form-control" placeholder="Pulse Form" @bind-value="drug.Forms"></div>
+                                                            </div>
+                                                            <div class="row mt-2">
+                                                                <div class="col-md-6"><label class="labels">UnitPrice</label><input type="text" class="form-control" placeholder="Enter Uniprice" @bind-value="drug.UnitPrice"></div>
+
+                                                                <div class="col-md-6"><label class="labels">TotalPrice</label><input type="text" class="form-control" placeholder="Enter Total Price" @bind-value="drug.TotalPrice"></div>
+                                                            </div>
+                                                        </div>
+
+
+
+                                                        <div>
+                                                            @if (patients.Count() > 0)
+                                                            {
+                                                                drugaccount = 1;
+                                                                <div class="row mt-4">
+                                                                    <table class="table border" style="font-size:12px">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>No</th>
+                                                                                <th>Drug Name </th>
+                                                                                <th>Quantity</th>
+                                                                                <th>Strength</th>
+                                                                                <th>UnitPrice</th>
+                                                                                <th>TotalPrice</th>
+                                                                                <th> </th>
+
+
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+
+                                                                            @foreach (var drugs in patient.Drugs)
+                                                                            {
+                                                                                <tr>
+
+                                                                                    <td>@drugaccount</td>
+                                                                                    <td>@drugs.DrugName</td>
+                                                                                    <td>@drugs.Quantity</td>
+                                                                                    <td>@drugs.Strength</td>
+                                                                                    <td>@drugs.UnitPrice</td>
+                                                                                    <td>@drugs.TotalPrice</td>
+                                                                                    <td>
+                                                                                        <div class="btn-group-sm">
+                                                                                            <button class="btn btn-danger" @onclick="@(e=>DeleteDrug(drugs.OId))">Delete</button>
+                                                                                            <button class="btn btn-warning" @onclick="@(e=>EditDrug(drugs))">Edit</button>
+                                                                                        </div>
+                                                                                    </td>
+
+
+                                                                                </tr>
+                                                                                drugaccount++;
+                                                                            }
+
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                                <div class="d-flex align-items-end experience mt-3">
+
+                                                                    <button class="btn btn-primary ">
+                                                                        <i class="oi oi-dollar"></i>Total Amount: @patient.DrugFee
+                                                                    </button>
+
+
+                                                                </div>
+                                                            }
+                                                        </div>
+
+
+                                                    </RadzenTabsItem>
+                                                    <RadzenTabsItem Text="Diagnosis">
+                                                        <div>
+                                                            <div class="d-flex justify-content-between align-items-center experience">
+                                                                <span>Diagnosis Information</span>
+                                                                <button class="btn btn-primary profile-button" @onclick="AddDiagnosis">
+                                                                    <i class="oi oi-circle-check pr-2"></i>Save
+                                                                </button>
+                                                            </div>
+                                                            <div class="row mt-4">
+                                                                <div class="col-md-12">
+                                                                    <label class="labels">Diagnosis Name</label>
+                                                                    <div class="input-group mb-3">
+                                                                        <input type="text" autocomplete="on" class="form-control" placeholder="Enter Diagnosis Name" @bind-value="diagnosis.DiagnosisName">
+                                                                        <div class="input-group-append">
+                                                                            <button class="btn btn-info">
+                                                                                <i class="oi oi-plus pr-2"></i>New
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+
+                                                            </div>
+                                                            <div class="row mt-3">
+
+                                                                <div class="col-md-6"><label class="labels">Result </label><input type="text" autocomplete="on" class="form-control" placeholder="Enter Result " @bind-value="diagnosis.Result"></div>
+                                                                <div class="col-md-6"><label class="labels">Price</label><input type="text" class="form-control" placeholder="Enter Price" @bind-value="diagnosis.UnitPrice"></div>
+                                                            </div>
+
+                                                        </div>
+
+
+
+                                                        <div>
+                                                            @if (patients.Count() > 0)
+                                                            {
+                                                                disaccount = 1;
+                                                                <div class="row mt-4">
+                                                                    <table class="table border" style="font-size:12px">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>No</th>
+                                                                                <th>Diagnosis Name </th>
+                                                                                <th>Result</th>
+                                                                                <th>Price</th>
+
+                                                                                <th> </th>
+
+
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+
+                                                                            @foreach (var dia in patient.Diagnosises)
+                                                                            {
+                                                                                <tr>
+
+                                                                                    <td>@disaccount</td>
+                                                                                    <td>@dia.DiagnosisName</td>
+                                                                                    <td>@dia.Result</td>
+                                                                                    <td>@dia.UnitPrice</td>
+
+                                                                                    <td>
+                                                                                        <div class="btn-group-sm">
+                                                                                            <button class="btn btn-danger" @onclick="@(e=>DeleteDrugDiagnosis(dia.OId))">Delete</button>
+                                                                                            <button class="btn btn-warning" @onclick="@(e=>EditDrugDiagnosis(dia))">Edit</button>
+                                                                                        </div>
+                                                                                    </td>
+
+
+                                                                                </tr>
+                                                                                disaccount++;
+                                                                            }
+
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                                <div class="d-flex align-items-end experience mt-3">
+
+                                                                    <button class="btn btn-primary ">
+                                                                        <i class="oi oi-dollar"></i>Total Amount:  @patient.DiagnosisFee
+                                                                    </button>
+
+
+                                                                </div>
+                                                            }
+                                                        </div>
+
+                                                    </RadzenTabsItem>
+                                                    <RadzenTabsItem Text="Treatment">
+                                                        <div>
+                                                            <div class="d-flex justify-content-between align-items-center experience">
+                                                                <span>Treatment Information</span>
+                                                                <button class="btn btn-primary profile-button" @onclick="AddTreatment">
+                                                                    <i class="oi oi-circle-check pr-2"></i>Save
+                                                                </button>
+                                                            </div>
+                                                            <div class="row mt-4">
+                                                                <div class="col-md-12">
+                                                                    <label class="labels">Treatment Name</label>
+
+                                                                    <textarea style="height:100px" class="form-control" placeholder="Enter Complaint" @bind="treatment.Text"> </textarea>
+
+
+                                                                </div>
+
+
+                                                            </div>
+
+
+                                                        </div>
+
+
+
+                                                        <div>
+                                                            @if (patients.Count() > 0)
+                                                            {
+                                                                treaccount = 1;
+                                                                <div class="row mt-4">
+                                                                    <table class="table border" style="font-size:12px">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>No</th>
+                                                                                <th>Name </th>
+
+                                                                                <th> </th>
+
+
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+
+                                                                            @foreach (var dia in patient.Treatments)
+                                                                            {
+                                                                                <tr>
+
+                                                                                    <td>@treaccount</td>
+                                                                                    <td>@dia.Text</td>
+                                                                                    <td>
+                                                                                        <div class="btn-group-sm">
+                                                                                            <button class="btn btn-danger" @onclick="@(e=>DeleteTreatment(dia.OId))">Delete</button>
+                                                                                            <button class="btn btn-warning" @onclick="@(e=>EditTreatment(dia))">Edit</button>
+                                                                                        </div>
+                                                                                    </td>
+
+
+                                                                                </tr>
+                                                                                treaccount++;
+                                                                            }
+
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+
+                                                            }
+                                                        </div>
+
+                                                    </RadzenTabsItem>
+                                                    <RadzenTabsItem Text="Charge">
+                                                        <div>
+                                                            <div class="d-flex justify-content-between align-items-center experience">
+                                                                <span>Charge Information</span>
+                                                                <button class="btn btn-primary profile-button" @onclick="AddCharg">
+                                                                    <i class="oi oi-circle-check pr-2"></i>Save
+                                                                </button>
+                                                            </div>
+
+                                                            <div class="row mt-3">
+
+                                                                <div class="col-md-6"><label class="labels">Charge </label><input type="text" autocomplete="on" class="form-control" placeholder="Enter Charge Name" @bind-value="charge.Name"></div>
+                                                                <div class="col-md-6"><label class="labels">Price</label><input type="text" class="form-control" placeholder="Enter Price" @bind-value="charge.UnitPrice"></div>
+                                                            </div>
+
+                                                        </div>
+
+
+
+                                                        <div>
+                                                            @if (patients.Count() > 0)
+                                                            {
+                                                                chargeaccount = 1;
+                                                                <div class="row mt-4">
+                                                                    <table class="table border" style="font-size:12px">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>No</th>
+                                                                                <th> Name </th>
+
+                                                                                <th>Price</th>
+
+                                                                                <th> </th>
+
+
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+
+                                                                            @foreach (var dia in patient.Charges)
+                                                                            {
+                                                                                <tr>
+
+                                                                                    <td>@chargeaccount</td>
+                                                                                    <td>@dia.Name</td>
+
+                                                                                    <td>@dia.UnitPrice</td>
+                                                                                    <td>
+                                                                                        <div class="btn-group-sm">
+                                                                                            <button class="btn btn-danger" @onclick="@(e=>DeleteCharg(dia.OId))">Delete</button>
+                                                                                            <button class="btn btn-warning" @onclick="@(e=>EditCharg(dia))">Edit</button>
+                                                                                        </div>
+                                                                                    </td>
+
+
+                                                                                </tr>
+                                                                                chargeaccount++;
+                                                                            }
+
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                                <div class="row mt-3 ml-lg-5 mr-3">
+
+                                                                    <div class="col-md-12">
+                                                                        <label class="labels" style="font-size:16px;font-weight:bold">Charge Fee </label>
+                                                                        <input type="text" autocomplete="on" class="form-control" placeholder="Enter Tax Name" value="@patient.ChargeFee">
+                                                                    </div>
+
+
+                                                                </div>
+                                                                <div class="row mt-1 ml-lg-5 mr-3">
+
+                                                                    <div class="col-md-12">
+                                                                        <label class="labels" style="font-size:16px;font-weight:bold">Diagnosis Fee </label>
+                                                                        <input type="text" autocomplete="on" class="form-control" placeholder="Enter Tax Name" value="@patient.DiagnosisFee">
+                                                                    </div>
+
+
+
+
+                                                                </div>
+                                                                <div class="row mt-1 ml-lg-5 mr-3">
+
+
+                                                                    <div class="col-md-12">
+                                                                        <label class="labels" style="font-size:16px;font-weight:bold">Drug Fee</label>
+                                                                        <input type="text" autocomplete="on" class="form-control" placeholder="Enter Tax Name" value="@patient.DrugFee">
+                                                                    </div>
+
+
+
+
+                                                                </div>
+                                                                <div class="row mt-1 ml-lg-5 mr-3">
+                                                                    <div class="col-md-12"><label class="labels" style="font-size:16px;font-weight:bold">Tax </label><input type="text" autocomplete="on" class="form-control" placeholder="Enter Tax Name" @bind-value="patient.Tax"></div>
+
+                                                                </div>
+                                                                <div class="row mt-1 ml-lg-5 mr-3">
+                                                                    <div class="col-md-12">
+                                                                        <label class="labels" style="font-size:16px;font-weight:bold">
+                                                                            Total Amount:
+                                                                        </label><input type="text" autocomplete="on" class="form-control" placeholder="Enter Tax Name" value="@patient.GrandTotal">
+                                                                    </div>
+
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </RadzenTabsItem>
+                                                </Tabs>
+                                            </RadzenTabs>
+                                        </div>
+                                    </div>
+                                    @*medical record end*@
+                                </RadzenTabsItem>
+
+
+                            </Tabs>
+                        </RadzenTabs>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <WebCam @ref="webcam" eventCallback="@GetImage"> </WebCam>
+    @if (ShowScanBarcode)
+    {
+
+        <BarcodeReader ScanResult="((e) => onChangeQRcode(e))"
+                       ShowScanBarcode="ShowScanBarcode"
+                       Close="(()=>ShowScanBarcode=!ShowScanBarcode)"
+                       ScanBtnTitle="Scan"
+                       ResetBtnTitle="Reset"
+                       CloseBtnTitle="Close"
+                       SelectDeviceBtnTitle="Select Device" />
+    }
+
+}
+
+@code {
+
+    bool ShowScanBarcode { get; set; } = false;
+    protected Person person { get; set; }
+    int drugaccount { get; set; } = 1;
+    int disaccount { get; set; } = 1;
+    int treaccount { get; set; } = 1;
+    int chargeaccount { get; set; } = 1;
+    protected OPdWebApp.Address address { get; set; }
+    WebCam webcam { get; set; }
+    private Task<IJSObjectReference> _module;
+    private Task<IJSObjectReference> Module => _module ??= JS.InvokeAsync<IJSObjectReference>("import", "./js/webcam.js").AsTask();
+    protected bool ShowConfirm { get; set; }
+    [Parameter]
+    public int Id { get; set; }
+    [Parameter]
+
+    public EventCallback<Patient> EventCallback { get; set; }
+    int seletedindex = 0;
+    protected Drug drug { get; set; }
+    protected Diagnosis diagnosis { get; set; }
+    protected Treatment treatment { get; set; }
+    protected Charge charge { get; set; }
+    protected Patient patient { get; set; }
+    OPDPage oPDPage { get; set; }
+    int account = 1;
+    // protected IEnumerable<Person> persons { get; set; }
+    protected IEnumerable<Patient> patients { get; set; } = new List<Patient>();
+
+    public void Show()
+    {
+        //  persons = p;
+        ShowConfirm = true;
+        loading();
+        StateHasChanged();
+    }
+    public void EditPerson(Patient p)
+    {
+        try
+        {
+            ShowConfirm = true;
+            patient = p;
+            person = _mapper.Map<Person>(p.PId);
+            person.PId = p.PId.PId;
+            person.address = p.PId.address;
+            person.QRCode = qrcode.QRCODE(person.PId.ToString());
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        StateHasChanged();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+
+        loading();
+    }
+    void loading()
+    {
+
+        person = new Person();
+
+        patient = new Patient();
+        address = new OPdWebApp.Address();
+        drug = new Drug();
+        diagnosis = new Diagnosis();
+        treatment = new Treatment();
+        charge = new Charge();
+        person.QRCode = qrcode.QRCODE(person.PId.ToString());
+    }
+
+    public void Close()
+    {
+
+
+        ShowConfirm = false;
+
+    }
+
+
+
+    void CheckActive(ChangeEventArgs e)
+    {
+        if (Convert.ToBoolean(e.Value) == false)
+        {
+            person.Status = Status.Inactive;
+        }
+        else
+        {
+            person.Status = Status.Active;
+        }
+
+
+    }
+
+    void WebCamShow()
+    {
+        webcam.Show();
+    }
+    void GetImage(string photo)
+    {
+        person.Photo = photo;
+    }
+    private async void onChangeQRcode(string e)
+    {
+
+
+        
+        ShowScanBarcode = !ShowScanBarcode;
+        // person = persons.FirstOrDefault(obj => obj.Id == e);
+        patient = await repositoryt.patient.GetAsync(e);
+        // person = persons.FirstOrDefault(obj => obj.QRCode == person.QRCode);
+        StateHasChanged();
+
+    }
+
+    private async void PrintQRCode()
+    {
+
+        if (person.QRCode != "")
+        {
+            var module = await Module;
+            await module.InvokeVoidAsync("PrintQRCode", person.QRCode);
+        }
+
+    }
+
+    private async void SaveAddress()
+    {
+        var editaddress = person.address.FirstOrDefault(obj => obj.OId == address.OId);
+        if (editaddress == null)
+        {
+            person.address.Add(address);
+
+        }
+        else
+        {
+
+        }
+        address = new Address();
+
+        StateHasChanged();
+
+    }
+    private string error;
+
+    private async void SaveProfile()
+    {
+
+        try
+        {
+
+
+            person.patient = patient;
+            patient.PersonPId = person.PId;
+            patient.PId= _mapper.Map<VirtualPerson>(person);
+            EventCallback.InvokeAsync(patient);
+
+            var obj = await repositoryt.persons.UpsertAsync(person);
+            //  error = obj.ToString();
+
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+
+
+
+
+        }
+        NewPerson();
+        StateHasChanged();
+
+    }
+    async void NewPerson()
+    {
+
+        person = new Person();
+
+        patient = new Patient();
+        patient.loginuser = AuthenticationService.User.email;
+        patients = new List<Patient>();
+        address = new OPdWebApp.Address();
+        person.QRCode = qrcode.QRCODE(person.PId.ToString());
+    }
+    async void EditAddress(Address editaddress)
+    {
+
+        address = editaddress;
+
+    }
+    async void ontabchange(int index)
+    {
+
+        if (index == 1)
+        {
+            patient = new Patient();
+            patient.Age = patient.AgeCalc((DateTime)person.DateOfBirth);
+        }
+        else if (index == 2)
+        {
+
+            try
+            {
+
+                patients = await repositoryt.patient.GetAsync(person.PId, 1);
+                patient = patients.Last();
+            }
+            catch (Exception ex)
+            {
+                // error = ex.Message;
+            }
+
+            StateHasChanged();
+        }
+    }
+    async void AddPatiten()
+    {
+        try
+        {
+            person.patient = patient;
+            patient.PersonPId = person.PId;
+            var obj = await repositoryt.persons.UpsertAsync(person);
+            //var ilist = patients.ToList();
+            //ilist.Add(patient);
+            //patients = ilist.ToList();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+
+        patient = new Patient();
+        patient.loginuser = AuthenticationService.User.email;
+        patient.Age = patient.AgeCalc((DateTime)person.DateOfBirth);
+        StateHasChanged();
+    }
+    async void SaveManagement()
+    {
+
+        StateHasChanged();
+    }
+    async void EditPatietn(Patient editpatient)
+    {
+
+        patient = editpatient;
+        account = 1;
+        seletedindex = 1;
+
+    }
+    async void ViewPatietn(Patient editpatient)
+    {
+
+        patient = editpatient;
+        StateHasChanged();
+
+
+    }
+
+
+    async void AddCharg()
+    {
+
+        var drugvar = patient.Charges.FirstOrDefault(obj => obj.OId == charge.OId);
+        if (drugvar == null)
+        {
+            patient.Charges.Add(charge);
+        }
+
+
+        charge = new Charge();
+
+
+    }
+    async void EditCharg(Charge editdiagnosis)
+    {
+
+        charge = editdiagnosis;
+
+
+    }
+    async void DeleteCharg(string Id)
+    {
+        var obj = patient.Charges.Where(obj => obj.OId == Id);
+        patient.Charges = patient.Charges.Except(obj).ToList();
+
+    }
+
+    async void AddTreatment()
+    {
+
+        var drugvar = patient.Treatments.FirstOrDefault(obj => obj.OId == treatment.OId);
+        if (drugvar == null)
+        {
+            patient.Treatments.Add(treatment);
+        }
+
+
+        treatment = new Treatment();
+
+
+    }
+    async void EditTreatment(Treatment editdiagnosis)
+    {
+
+        treatment = editdiagnosis;
+
+
+    }
+    async void DeleteTreatment(string Id)
+    {
+        var obj = patient.Treatments.Where(obj => obj.OId == Id);
+        patient.Treatments = patient.Treatments.Except(obj).ToList();
+
+    }
+    async void AddDiagnosis()
+    {
+
+        var drugvar = patient.Diagnosises.FirstOrDefault(obj => obj.OId == diagnosis.OId);
+        if (drugvar == null)
+        {
+            patient.Diagnosises.Add(diagnosis);
+        }
+
+
+        diagnosis = new Diagnosis();
+
+
+    }
+    async void EditDrugDiagnosis(Diagnosis editdiagnosis)
+    {
+
+        diagnosis = editdiagnosis;
+
+
+    }
+    async void DeleteDrugDiagnosis(string Id)
+    {
+        var obj = patient.Diagnosises.Where(obj => obj.OId == Id);
+        patient.Diagnosises = patient.Diagnosises.Except(obj).ToList();
+
+    }
+
+    async void AddDrug()
+    {
+
+        var drugvar = patient.Drugs.FirstOrDefault(obj => obj.OId == drug.OId);
+        if (drugvar == null)
+        {
+            patient.Drugs.Add(drug);
+        }
+
+
+        drug = new Drug();
+
+
+    }
+    async void EditDrug(Drug editdrug)
+    {
+
+        drug = editdrug;
+
+
+    }
+    async void DeleteDrug(string Id)
+    {
+        var obj = patient.Drugs.Where(obj => obj.OId == Id);
+        patient.Drugs = patient.Drugs.Except(obj).ToList();
+
+    }
+
+    async void DeletePatitent(string Id)
+    {
+        //var obj = person.patients.Where(obj => obj.Id == Id);
+        //person.patients = person.patients.Except(obj).ToList();
+    }
+    async void DeleteAddress(string Id)
+    {
+        var obj = person.address.Where(obj => obj.OId == Id);
+        person.address = person.address.Except(obj).ToList();
+    }
+
+}
